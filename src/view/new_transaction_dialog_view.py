@@ -29,7 +29,9 @@ class NewTransactionDialogView(QDialog):
         )
         self.combo_box_type = QComboBox()
         self.combo_box_type.addItems(["Expense", "Income"])
-        self.line_edit_category = QLineEdit()
+        self.combo_box_category = QComboBox()
+        self.combo_box_category.addItems(["Need", "Want", "Saving", "Other"])
+        self.line_edit_details = QLineEdit()
 
         self.button_ok = QPushButton("Ok")
         self.button_cancel = QPushButton("Cancel")
@@ -39,7 +41,8 @@ class NewTransactionDialogView(QDialog):
         f_layout_transaction.addRow("Amount", self.spin_box_amount)
         f_layout_transaction.addRow("Date", self.date_time_edit)
         f_layout_transaction.addRow("Type", self.combo_box_type)
-        f_layout_transaction.addRow("Category", self.line_edit_category)
+        f_layout_transaction.addRow("Category", self.combo_box_category)
+        f_layout_transaction.addRow("Details", self.line_edit_details)
 
         h_layout_buttons = QHBoxLayout()
         h_layout_buttons.addWidget(self.button_ok)

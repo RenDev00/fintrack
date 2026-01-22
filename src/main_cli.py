@@ -1,11 +1,12 @@
 from model.finance_tracker import FinanceTracker
-from model.transaction import TransactionType
+from model.transaction import TransactionCategory, TransactionType
 
 
 def add_transaction_cli(tracker: FinanceTracker):
     amount = input("Amount: ")
     transaction_type = input("Transaction type [expense / income]: ")
-    transaction_category = input("Transaction category: ")
+    transaction_category = input("Transaction category [need / want / other]: ")
+    transaction_details = input("Transaction details: ")
 
     try:
         amount = float(amount)
@@ -20,14 +21,40 @@ def add_transaction_cli(tracker: FinanceTracker):
         return
 
     try:
-        tracker.add_transaction(amount, transaction_type, transaction_category)
+        transaction_category = TransactionCategory[transaction_category.upper()]
+    except KeyError:
+        print(f"Error, invalid transaction category {transaction_category}")
+        return
+
+    try:
+        tracker.add_transaction(
+            amount, transaction_type, transaction_category, transaction_details
+        )
     except ValueError as e:
         print(f"Error, {e}")
 
 
+def print_transactions_by_type_cli(tracker: FinanceTracker):
+    t_type = input("Type [income / expense]: ")
+    try:
+        transaction_type = TransactionType[t_type.upper()]
+    except KeyError:
+        print(f"Error, invalid transaction type {t_type}")
+        return
+
+    transactions = tracker.get_transactions_by_type(transaction_type)
+    for t in transactions:
+        print(t)
+
+
 def print_transactions_by_category_cli(tracker: FinanceTracker):
-    category = input("Category: ")
-    transactions = tracker.get_transactions_by_category(category)
+    t_category = input("Category [need / want / other]: ")
+    try:
+        transaction_category = TransactionCategory[t_category.upper()]
+    except KeyError:
+        print(f"Error, invalid transaction category {t_category}")
+        return
+    transactions = tracker.get_transactions_by_category(transaction_category)
     for t in transactions:
         print(t)
 
@@ -42,8 +69,9 @@ def main():
         print("2. Show Total Income")
         print("3. Show Total Expenses")
         print("4. Show Balance")
-        print("5. Show by Category")
-        print("6. Exit")
+        print("5. Show by Type")
+        print("6. Show by Category")
+        print("7. Exit")
 
         choice = input("Choose from action 1 - 6: ")
         try:
@@ -60,14 +88,18 @@ def main():
             case 1:
                 add_transaction_cli(tracker)
             case 2:
-                print(f"Your total income is {tracker.get_total_income()}")
+                print(f"Your total income is {round(tracker.get_total_income(), 2)}")
             case 3:
-                print(f"Your total expenses are {tracker.get_total_expenses()}")
+                print(
+                    f"Your total expenses are {round(tracker.get_total_expenses(), 2)}"
+                )
             case 4:
-                print(f"Your balance is {tracker.get_balance()}")
+                print(f"Your balance is {round(tracker.get_balance(), 2)}")
             case 5:
-                print_transactions_by_category_cli(tracker)
+                print_transactions_by_type_cli(tracker)
             case 6:
+                print_transactions_by_category_cli(tracker)
+            case 7:
                 cont = False
 
     else:

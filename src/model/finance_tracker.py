@@ -2,7 +2,7 @@ import json
 import os
 import uuid
 
-from model.transaction import Transaction, TransactionType
+from model.transaction import Transaction, TransactionCategory, TransactionType
 
 
 class FinanceTracker:
@@ -14,14 +14,19 @@ class FinanceTracker:
         self,
         amount: float,
         transaction_type: TransactionType,
-        transaction_category: str,
+        transaction_category: TransactionCategory,
+        transaction_details: str,
         transaction_date: str = None,
     ):
         if amount <= 0:
             raise ValueError("Amount must be greater than 0")
 
         new_transaction = Transaction(
-            amount, transaction_type, transaction_category, transaction_date
+            amount,
+            transaction_type,
+            transaction_category,
+            transaction_details,
+            transaction_date,
         )
         self.transactions.append(new_transaction)
         self.save_transactions()
@@ -35,13 +40,15 @@ class FinanceTracker:
         uuid: uuid.UUID,
         amount: float,
         transaction_type: TransactionType,
-        transaction_category: str,
+        transaction_category: TransactionCategory,
+        transaction_details: str,
         transaction_date: str,
     ):
         transaction = self.get_transaction_by_uuid(uuid)
         transaction.amount = amount
         transaction.transaction_type = transaction_type
         transaction.transaction_category = transaction_category
+        transaction.transaction_details = transaction_details
         transaction.transaction_date = transaction_date
         self.save_transactions()
 
@@ -59,7 +66,8 @@ class FinanceTracker:
                 Transaction(
                     float(t["amount"]),
                     TransactionType[t["type"]],
-                    t["category"],
+                    TransactionCategory[t["category"]],
+                    t["details"],
                     t["date"],
                     uuid.UUID(t["uuid"]),
                 )
@@ -80,12 +88,12 @@ class FinanceTracker:
         return [t for t in self.transactions if t.transaction_type == transaction_type]
 
     def get_transactions_by_category(
-        self, transaction_category: str
+        self, transaction_category: TransactionCategory
     ) -> list[Transaction]:
         return [
             t
             for t in self.transactions
-            if t.transaction_category == transaction_category.lower()
+            if t.transaction_category == transaction_category
         ]
 
     def get_total_income(self) -> float:
