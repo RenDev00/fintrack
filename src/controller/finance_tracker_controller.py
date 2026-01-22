@@ -4,11 +4,12 @@ from controller.edit_transaction_dialog_controller import (
 )
 from controller.new_transaction_dialog_controller import NewTransactionDialogController
 from model.finance_tracker import FinanceTracker
-from model.transaction import Transaction, TransactionType
+from model.transaction import Transaction, TransactionCategory, TransactionType
 from view.edit_transaction_dialog_view import EditTransactionDialogView
 from view.finance_tracker_view import FinanceTrackerView
 
 from PySide6.QtWidgets import QTableWidgetItem, QMessageBox
+from PySide6.QtCore import Qt
 
 from view.new_transaction_dialog_view import NewTransactionDialogView
 
@@ -24,7 +25,8 @@ class FinanceTrackerController:
         self.view.button_edit.clicked.connect(self.handle_edit)
         self.view.button_delete.clicked.connect(self.handle_delete)
         self.view.line_edit_search_term.textChanged.connect(self.handle_search)
-        self.view.combo_box_filter.currentTextChanged.connect(self.handle_search)
+        self.view.combo_box_type.currentTextChanged.connect(self.handle_search)
+        self.view.combo_box_category.currentTextChanged.connect(self.handle_search)
 
     def populate_transaction_table(self, transactions: list[Transaction] = None):
         if transactions == None:
@@ -40,11 +42,18 @@ class FinanceTrackerController:
                     str(t.uuid),
                     t.transaction_date,
                     t.transaction_type.name,
+                    t.transaction_category.name,
                     f"{round(t.amount, 2):.2f}",
-                    t.transaction_category.capitalize(),
+                    t.transaction_details,
                 ]
             ):
                 item = QTableWidgetItem(data)
+                if col not in [4, 5]:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                elif col == 4:
+                    item.setTextAlignment(
+                        Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+                    )
                 self.view.table_transactions.setItem(row, col, item)
 
         self.update_status_bar()
@@ -91,35 +100,26 @@ class FinanceTrackerController:
 
     def handle_search(self):
         search_term = self.view.line_edit_search_term.text().lower()
-        search_filter = self.view.combo_box_filter.currentText().strip().upper()
+        type_filter = self.view.combo_box_type.currentText().strip().upper()
+        category_filter = self.view.combo_box_category.currentText().strip().upper()
 
-        # No searchterm and filter is all
-        if search_term == "" and search_filter == "ALL":
-            transactions = self.model.transactions
+        transactions = self.model.transactions
 
-        # No Searchterm and filter is not all
-        if search_term == "" and search_filter != "ALL":
+        if search_term:
             transactions = [
-                t
-                for t in self.model.transactions
-                if t.transaction_type.name == search_filter
+                t for t in transactions if search_term in t.transaction_details.lower()
             ]
-
-        # Searchterm entered and filter is all
-        if search_term != "" and search_filter == "ALL":
+        if type_filter != "ALL":
             transactions = [
                 t
-                for t in self.model.transactions
-                if search_term in t.transaction_category
+                for t in transactions
+                if t.transaction_type == TransactionType[type_filter]
             ]
-
-        # Searchterm entered and filter not all
-        if search_term != "" and search_filter != "ALL":
+        if category_filter != "ALL":
             transactions = [
                 t
-                for t in self.model.transactions
-                if (search_term in t.transaction_category)
-                and (t.transaction_type.name == search_filter)
+                for t in transactions
+                if t.transaction_category == TransactionCategory[category_filter]
             ]
 
         self.populate_transaction_table(transactions)

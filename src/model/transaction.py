@@ -1,11 +1,18 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 import uuid
 
 
-class TransactionType(Enum):
-    INCOME = 0
-    EXPENSE = 1
+class TransactionType(StrEnum):
+    INCOME = "Income"
+    EXPENSE = "Expense"
+
+
+class TransactionCategory(StrEnum):
+    NEED = "Need"
+    WANT = "Want"
+    SAVING = "Saving"
+    OTHER = "Other"
 
 
 class Transaction:
@@ -13,18 +20,20 @@ class Transaction:
         self,
         amount: float,
         transaction_type: TransactionType,
-        transaction_category: str,
+        transaction_category: TransactionCategory,
+        transaction_details: str,
         transaction_date: str = None,
         id: uuid.UUID = None,
     ):
         self.uuid = id if id else uuid.uuid4()
         self.amount = amount
         self.transaction_type = transaction_type
-        self.transaction_category = transaction_category.lower()
+        self.transaction_category = transaction_category
+        self.transaction_details = transaction_details
         self.transaction_date = (
             transaction_date
             if transaction_date
-            else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            else datetime.now().strftime("%Y-%m-%d %H:%M")
         )
 
     def __str__(self):
@@ -35,6 +44,7 @@ class Transaction:
             "uuid": str(self.uuid),
             "amount": self.amount,
             "type": self.transaction_type.name,
-            "category": self.transaction_category,
+            "category": self.transaction_category.name,
+            "details": self.transaction_details,
             "date": self.transaction_date,
         }
