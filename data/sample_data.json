@@ -1,72 +1,66 @@
 [
     {
-        "uuid": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
-        "amount": 3500.00,
+        "uuid": "0aebddcf-5eed-4796-b7b2-f9c4a0c9c6eb",
+        "amount": 516.0,
+        "type": "EXPENSE",
+        "category": "NEED",
+        "details": "Public Transport",
+        "date": "2026-01-05 19:07"
+    },
+    {
+        "uuid": "3a761e71-0eb1-4929-9905-d6cb5c2dabce",
+        "amount": 10.9,
+        "type": "EXPENSE",
+        "category": "NEED",
+        "details": "Lunch",
+        "date": "2026-01-07 11:21"
+    },
+    {
+        "uuid": "c0cca21e-005c-4b47-98fc-b9908158afe3",
+        "amount": 19.91,
+        "type": "EXPENSE",
+        "category": "NEED",
+        "details": "Groceries",
+        "date": "2026-01-07 19:23"
+    },
+    {
+        "uuid": "ab1f4d27-67be-48b1-b9c2-064ce451fa04",
+        "amount": 63.32,
+        "type": "EXPENSE",
+        "category": "NEED",
+        "details": "Car Insurance",
+        "date": "2026-01-07 18:33"
+    },
+    {
+        "uuid": "12a1f397-7c31-4e20-8fd0-ebfff4b12a8a",
+        "amount": 300.0,
+        "type": "EXPENSE",
+        "category": "SAVING",
+        "details": "BTC Savings Plan",
+        "date": "2026-01-13 10:38"
+    },
+    {
+        "uuid": "c7e5abaf-72fe-4b12-8d0a-6aa9c54dc0c0",
+        "amount": 13.91,
+        "type": "EXPENSE",
+        "category": "NEED",
+        "details": "Phone Bill",
+        "date": "2026-01-15 00:27"
+    },
+    {
+        "uuid": "9c382caa-ca19-4a71-92ba-fda9ec2e81ff",
+        "amount": 38.38,
+        "type": "EXPENSE",
+        "category": "WANT",
+        "details": "BD Present",
+        "date": "2026-01-22 17:18"
+    },
+    {
+        "uuid": "60783923-7cb3-49fc-9379-dbd2656ffc51",
+        "amount": 2000.0,
         "type": "INCOME",
-        "category": "salary",
-        "date": "2025-10-01 09:00:00"
-    },
-    {
-        "uuid": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
-        "amount": 45.75,
-        "type": "EXPENSE",
-        "category": "groceries",
-        "date": "2025-10-01 12:15:30"
-    },
-    {
-        "uuid": "c3d4e5f6-a7b8-4c9d-0e1f-2a3b4c5d6e7f",
-        "amount": 600.00,
-        "type": "EXPENSE",
-        "category": "rent",
-        "date": "2025-10-01 15:20:45"
-    },
-    {
-        "uuid": "d4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a",
-        "amount": 120.50,
-        "type": "EXPENSE",
-        "category": "utility",
-        "date": "2025-10-02 08:30:10"
-    },
-    {
-        "uuid": "e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b",
-        "amount": 25.99,
-        "type": "EXPENSE",
-        "category": "entertainment",
-        "date": "2025-10-02 19:45:22"
-    },
-    {
-        "uuid": "f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c",
-        "amount": 200.00,
-        "type": "INCOME",
-        "category": "freelance",
-        "date": "2025-10-03 10:10:15"
-    },
-    {
-        "uuid": "a7b8c9d0-e1f2-4a3b-5c6d-7e8f9a0b1c2d",
-        "amount": 80.25,
-        "type": "EXPENSE",
-        "category": "transportation",
-        "date": "2025-10-03 14:22:50"
-    },
-    {
-        "uuid": "b8c9d0e1-f2a3-4b5c-6d7e-8f9a0b1c2d3e",
-        "amount": 35.60,
-        "type": "EXPENSE",
-        "category": "dining",
-        "date": "2025-10-03 18:30:00"
-    },
-    {
-        "uuid": "c9d0e1f2-a3b4-4c5d-6e7f-9a0b1c2d3e4f",
-        "amount": 150.00,
-        "type": "EXPENSE",
-        "category": "insurance",
-        "date": "2025-10-04 09:05:40"
-    },
-    {
-        "uuid": "d0e1f2a3-b4c5-4d6e-7f8a-0b1c2d3e4f5a",
-        "amount": 75.00,
-        "type": "EXPENSE",
-        "category": "groceries",
-        "date": "2025-10-04 11:50:25"
+        "category": "OTHER",
+        "details": "Salary",
+        "date": "2026-01-27 15:49"
     }
 ]
