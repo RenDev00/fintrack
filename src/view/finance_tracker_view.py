@@ -6,10 +6,17 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QAbstractItemView,
     QLineEdit,
+    QToolBar,
+    QStackedWidget,
     QVBoxLayout,
     QHBoxLayout,
     QGroupBox,
 )
+from PySide6.QtGui import QAction
+from PySide6.QtCore import Qt
+import pyqtgraph as pg
+
+from utility import svg_icon_loader
 
 
 class FinanceTrackerView(QMainWindow):
@@ -19,11 +26,41 @@ class FinanceTrackerView(QMainWindow):
         self.setMinimumSize(560, 440)
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
+        # Actions
+        self.action_home = QAction(
+            svg_icon_loader.get_icon("./data/svg/home_24dp.svg", "#8ab4f7"),
+            "Home",
+        )
+        self.action_graph = QAction(
+            svg_icon_loader.get_icon("./data/svg/graph_24dp.svg", "#8ab4f7"),
+            "Graph",
+        )
+
+        self.actions_side_bar = (
+            self.action_home,
+            self.action_graph,
+        )
+
+        # Widgets
+        self.stacked_widget = QStackedWidget()
+
+        self.home_widget = self.build_home_ui()
+        self.graph_widget = self.build_graph_ui()
+
+        side_bar = QToolBar()
+        side_bar.setObjectName("side_bar")
+        side_bar.addActions(self.actions_side_bar)
+
+        # Layout
+        self.stacked_widget.addWidget(self.home_widget)
+        self.stacked_widget.addWidget(self.graph_widget)
+        self.setCentralWidget(self.stacked_widget)
+        self.addToolBar(Qt.ToolBarArea.LeftToolBarArea, side_bar)
+
+    def build_home_ui(self) -> QWidget:
         # Widgets
         central_widget = QWidget()
-
-        self.status_bar = self.statusBar()
 
         group_box_control = QGroupBox("Transaction Control")
         self.button_new = QPushButton("New")
@@ -75,4 +112,64 @@ class FinanceTrackerView(QMainWindow):
         v_layout_main.addWidget(group_box_transactions)
 
         central_widget.setLayout(v_layout_main)
-        self.setCentralWidget(central_widget)
+        return central_widget
+
+    def build_graph_ui(self) -> QWidget:
+        central_widget = QWidget()
+        self.graph = pg.PlotWidget()
+        self.graph.setBackground(None)
+        self.graph.getPlotItem().setContentsMargins(10, 10, 10, 10)
+        self.graph.getPlotItem().setLabel("left", "Money")
+        self.graph.getPlotItem().showGrid(False, True)
+        self.graph.getPlotItem().addLegend()
+        for axis in ["left", "right", "top", "bottom"]:
+            ax = self.graph.getPlotItem().getAxis(axis)
+            ax.setZValue(-1)
+
+        self.bar_width = 0.2
+
+        self.income_bar = pg.BarGraphItem(
+            x=[],
+            height=[],
+            width=self.bar_width,
+            brush="#2ecc71",
+            pen=pg.mkPen("#27ae60", width=1.2),
+            name="Income",
+        )
+        self.graph.addItem(self.income_bar)
+
+        self.savings_bar = pg.BarGraphItem(
+            x=[],
+            height=[],
+            width=self.bar_width,
+            brush="#3498db",
+            pen=pg.mkPen("#2980b9", width=1),
+            name="Savings",
+        )
+        self.graph.addItem(self.savings_bar)
+
+        self.needs_bar = pg.BarGraphItem(
+            x=[],
+            height=[],
+            width=self.bar_width,
+            brush="#f39c12",
+            pen=pg.mkPen("#d35400", width=1),
+            name="Needs",
+        )
+        self.graph.addItem(self.needs_bar)
+
+        self.wants_bar = pg.BarGraphItem(
+            x=[],
+            height=[],
+            width=self.bar_width,
+            brush="#e74c3c",
+            pen=pg.mkPen("#c0392b", width=1),
+            name="Wants",
+        )
+        self.graph.addItem(self.wants_bar)
+
+        v_layout_main = QVBoxLayout()
+        v_layout_main.addWidget(self.graph)
+
+        central_widget.setLayout(v_layout_main)
+        return central_widget

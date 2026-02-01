@@ -19,6 +19,7 @@ class FinanceTrackerController:
         self.view = view
         self.model = model
         self.populate_transaction_table()
+        self.update_graph()
 
         # Signals
         self.view.button_new.clicked.connect(self.handle_new)
@@ -27,6 +28,14 @@ class FinanceTrackerController:
         self.view.line_edit_search_term.textChanged.connect(self.handle_search)
         self.view.combo_box_type.currentTextChanged.connect(self.handle_search)
         self.view.combo_box_category.currentTextChanged.connect(self.handle_search)
+        self.view.action_home.triggered.connect(self.show_home_tab)
+        self.view.action_graph.triggered.connect(self.show_graph_tab)
+
+    def show_home_tab(self):
+        self.view.stacked_widget.setCurrentIndex(0)
+
+    def show_graph_tab(self):
+        self.view.stacked_widget.setCurrentIndex(1)
 
     def populate_transaction_table(self, transactions: list[Transaction] = None):
         if transactions == None:
@@ -56,7 +65,6 @@ class FinanceTrackerController:
                     )
                 self.view.table_transactions.setItem(row, col, item)
 
-        self.update_status_bar()
         self.view.table_transactions.resizeColumnToContents(1)
 
     def handle_new(self):
@@ -64,6 +72,7 @@ class FinanceTrackerController:
         dialog_controller = NewTransactionDialogController(dialog_view, self.model)
         if dialog_controller.execute():
             self.handle_search()
+            self.update_graph()
 
     def handle_edit(self):
         current_table_row_index = self.view.table_transactions.currentRow()
@@ -78,6 +87,7 @@ class FinanceTrackerController:
 
         if dialog_controller.execute():
             self.handle_search()
+            self.update_graph()
 
     def handle_delete(self):
         current_table_row_index = self.view.table_transactions.currentRow()
@@ -97,6 +107,7 @@ class FinanceTrackerController:
         if dialog.exec() == QMessageBox.StandardButton.Yes:
             self.model.delete_transaction_by_uuid(id)
             self.handle_search()
+            self.update_graph()
 
     def handle_search(self):
         search_term = self.view.line_edit_search_term.text().lower()
@@ -124,7 +135,65 @@ class FinanceTrackerController:
 
         self.populate_transaction_table(transactions)
 
-    def update_status_bar(self):
-        self.view.status_bar.showMessage(
-            f"Balance: {round(self.model.get_balance(), 2):.2f} | Total Income: {round(self.model.get_total_income(), 2):.2f} | Total Expenses: {round(self.model.get_total_expenses(), 2):.2f}"
+    def update_graph(self) -> None:
+        monthly_data: dict[str, dict[str, float]] = {}
+
+        for t in self.model.transactions:
+            month = t.transaction_date[:7]
+            if month not in monthly_data:
+                monthly_data[month] = {
+                    "income": 0,
+                    "needs": 0,
+                    "wants": 0,
+                    "savings": 0,
+                }
+
+            if t.transaction_type == TransactionType.INCOME:
+                monthly_data[month]["income"] += t.amount
+            elif t.transaction_type == TransactionType.EXPENSE:
+                if t.transaction_category == TransactionCategory.NEED:
+                    monthly_data[month]["needs"] += t.amount
+                elif t.transaction_category == TransactionCategory.WANT:
+                    monthly_data[month]["wants"] += t.amount
+                elif t.transaction_category == TransactionCategory.SAVING:
+                    monthly_data[month]["savings"] += t.amount
+
+        sorted_months = sorted(monthly_data.keys())
+
+        x_positions = list(range(len(sorted_months)))
+        bar_width = self.view.bar_width
+
+        income_heights = [monthly_data[m]["income"] for m in sorted_months]
+        needs_heights = [monthly_data[m]["needs"] for m in sorted_months]
+        wants_heights = [monthly_data[m]["wants"] for m in sorted_months]
+        savings_heights = [monthly_data[m]["savings"] for m in sorted_months]
+
+        self.view.income_bar.setOpts(
+            x=[x - bar_width / 2 for x in x_positions],
+            height=income_heights,
         )
+        self.view.savings_bar.setOpts(
+            x=[x + bar_width / 2 for x in x_positions],
+            height=savings_heights,
+        )
+        self.view.needs_bar.setOpts(
+            x=[x + bar_width / 2 for x in x_positions],
+            height=needs_heights,
+            y0=savings_heights,
+        )
+        self.view.wants_bar.setOpts(
+            x=[x + bar_width / 2 for x in x_positions],
+            height=wants_heights,
+            y0=[s + n for s, n in zip(savings_heights, needs_heights)],
+        )
+
+        if sorted_months:
+            self.view.graph.getPlotItem().getAxis("bottom").setTicks(
+                [[(i, m) for i, m in enumerate(sorted_months)]]
+            )
+            self.view.graph.getPlotItem().showAxis("bottom")
+            x_min = -0.5 - bar_width
+            x_max = len(sorted_months) - 0.5 + bar_width
+            self.view.graph.getPlotItem().setXRange(x_min, x_max, padding=0)
+        else:
+            self.view.graph.getPlotItem().hideAxis("bottom")
