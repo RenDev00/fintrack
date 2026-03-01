@@ -10,8 +10,23 @@ class NewTransactionDialogController:
         self.model = model
 
         # Signals
+        self.view.combo_box_type.currentTextChanged.connect(
+            self.update_category_combo_box
+        )
         self.view.button_ok.clicked.connect(self.view.accept)
         self.view.button_cancel.clicked.connect(self.view.reject)
+
+        # Initialization
+        self.update_category_combo_box(self.view.combo_box_type.currentText())
+
+    def update_category_combo_box(self, typeText: str) -> None:
+        self.view.combo_box_category.clear()
+        if typeText == TransactionType.EXPENSE:
+            self.view.combo_box_category.addItems(["Need", "Want", "Saving"])
+        elif typeText == TransactionType.INCOME:
+            self.view.combo_box_category.addItems(
+                ["Salary", "Scholarship", "Pocket Money", "Other"]
+            )
 
     def execute(self) -> bool:
         if self.view.exec_() == QDialog.Rejected:

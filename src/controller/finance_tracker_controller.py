@@ -14,6 +14,15 @@ from PySide6.QtCore import Qt
 from view.new_transaction_dialog_view import NewTransactionDialogView
 
 
+class NumericTableWidgetItem(QTableWidgetItem):
+    def __init__(self, value: float, text: str):
+        super().__init__(text)
+        self._numeric_value = value
+
+    def __lt__(self, other):
+        return self._numeric_value < other._numeric_value
+
+
 class FinanceTrackerController:
     def __init__(self, view: FinanceTrackerView, model: FinanceTracker):
         self.view = view
@@ -28,8 +37,11 @@ class FinanceTrackerController:
         self.view.line_edit_search_term.textChanged.connect(self.handle_search)
         self.view.combo_box_type.currentTextChanged.connect(self.handle_search)
         self.view.combo_box_category.currentTextChanged.connect(self.handle_search)
+        self.view.combo_box_month.currentTextChanged.connect(self.handle_search)
         self.view.action_home.triggered.connect(self.show_home_tab)
         self.view.action_graph.triggered.connect(self.show_graph_tab)
+
+        self.populate_month_dropdown()
 
     def show_home_tab(self):
         self.view.stacked_widget.setCurrentIndex(0)
@@ -37,9 +49,38 @@ class FinanceTrackerController:
     def show_graph_tab(self):
         self.view.stacked_widget.setCurrentIndex(1)
 
-    def populate_transaction_table(self, transactions: list[Transaction] = None):
+    def populate_month_dropdown(self):
+        months = sorted(set(t.transaction_date[:7] for t in self.model.transactions))
+        self.view.combo_box_month.clear()
+        self.view.combo_box_month.addItem("All Months")
+        for month in months:
+            year, m = month.split("-")
+            month_names = [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+            ]
+            display_text = f"{month_names[int(m) - 1]} {year}"
+            self.view.combo_box_month.addItem(display_text, month)
+
+    def populate_transaction_table(self, transactions: list[Transaction] | None = None):
         if transactions == None:
             transactions = self.model.transactions
+
+        transactions = sorted(
+            transactions, key=lambda t: t.transaction_date, reverse=True
+        )
+
+        self.view.table_transactions.setSortingEnabled(False)
 
         for _ in range(self.view.table_transactions.rowCount()):
             self.view.table_transactions.removeRow(0)
@@ -52,25 +93,33 @@ class FinanceTrackerController:
                     t.transaction_date,
                     t.transaction_type.name,
                     t.transaction_category.name,
-                    f"{round(t.amount, 2):.2f}",
+                    t.amount,
                     t.transaction_details,
                 ]
             ):
-                item = QTableWidgetItem(data)
-                if col not in [4, 5]:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                elif col == 4:
+                if col == 4:
+                    item = NumericTableWidgetItem(t.amount, f"{round(t.amount, 2):.2f}")
                     item.setTextAlignment(
                         Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
                     )
+                else:
+                    item = QTableWidgetItem(data)
+                    if col not in [5]:
+                        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.view.table_transactions.setItem(row, col, item)
 
         self.view.table_transactions.resizeColumnToContents(1)
+        self.view.table_transactions.setSortingEnabled(True)
+        self.view.table_transactions.sortByColumn(1, Qt.SortOrder.DescendingOrder)
+        self.view.table_transactions.horizontalHeader().setSortIndicator(
+            1, Qt.SortOrder.DescendingOrder
+        )
 
     def handle_new(self):
         dialog_view = NewTransactionDialogView(self.view)
         dialog_controller = NewTransactionDialogController(dialog_view, self.model)
         if dialog_controller.execute():
+            self.populate_month_dropdown()
             self.handle_search()
             self.update_graph()
 
@@ -86,6 +135,7 @@ class FinanceTrackerController:
         )
 
         if dialog_controller.execute():
+            self.populate_month_dropdown()
             self.handle_search()
             self.update_graph()
 
@@ -106,6 +156,7 @@ class FinanceTrackerController:
 
         if dialog.exec() == QMessageBox.StandardButton.Yes:
             self.model.delete_transaction_by_uuid(id)
+            self.populate_month_dropdown()
             self.handle_search()
             self.update_graph()
 
@@ -113,6 +164,7 @@ class FinanceTrackerController:
         search_term = self.view.line_edit_search_term.text().lower()
         type_filter = self.view.combo_box_type.currentText().strip().upper()
         category_filter = self.view.combo_box_category.currentText().strip().upper()
+        month_filter = self.view.combo_box_month.currentData()
 
         transactions = self.model.transactions
 
@@ -120,17 +172,21 @@ class FinanceTrackerController:
             transactions = [
                 t for t in transactions if search_term in t.transaction_details.lower()
             ]
-        if type_filter != "ALL":
+        if type_filter != "ALL TYPES":
             transactions = [
                 t
                 for t in transactions
                 if t.transaction_type == TransactionType[type_filter]
             ]
-        if category_filter != "ALL":
+        if category_filter != "ALL CATEGORIES":
             transactions = [
                 t
                 for t in transactions
                 if t.transaction_category == TransactionCategory[category_filter]
+            ]
+        if month_filter:
+            transactions = [
+                t for t in transactions if t.transaction_date[:7] == month_filter
             ]
 
         self.populate_transaction_table(transactions)

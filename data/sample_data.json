@@ -59,8 +59,8 @@
         "uuid": "60783923-7cb3-49fc-9379-dbd2656ffc51",
         "amount": 2000.0,
         "type": "INCOME",
-        "category": "OTHER",
-        "details": "Salary",
+        "category": "SALARY",
+        "details": "Company",
         "date": "2026-01-27 15:49"
     }
 ]

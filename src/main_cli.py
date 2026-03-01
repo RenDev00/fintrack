@@ -5,8 +5,6 @@ from model.transaction import TransactionCategory, TransactionType
 def add_transaction_cli(tracker: FinanceTracker):
     amount = input("Amount: ")
     transaction_type = input("Transaction type [expense / income]: ")
-    transaction_category = input("Transaction category [need / want / other]: ")
-    transaction_details = input("Transaction details: ")
 
     try:
         amount = float(amount)
@@ -20,8 +18,19 @@ def add_transaction_cli(tracker: FinanceTracker):
         print(f"Error, invalid transaction type {transaction_type}")
         return
 
+    if transaction_type == TransactionType.EXPENSE:
+        transaction_category = input("Transaction category [need / want / saving]: ")
+    else:
+        transaction_category = input(
+            "Transaction category [salary / scholarship / pocket money / other]: "
+        )
+
+    transaction_details = input("Transaction details: ")
+
     try:
-        transaction_category = TransactionCategory[transaction_category.upper()]
+        transaction_category = TransactionCategory[
+            transaction_category.upper().replace(" ", "_")
+        ]
     except KeyError:
         print(f"Error, invalid transaction category {transaction_category}")
         return
@@ -48,7 +57,7 @@ def print_transactions_by_type_cli(tracker: FinanceTracker):
 
 
 def print_transactions_by_category_cli(tracker: FinanceTracker):
-    t_category = input("Category [need / want / other]: ")
+    t_category = input("Category [need / want / saving]: ")
     try:
         transaction_category = TransactionCategory[t_category.upper()]
     except KeyError:
@@ -73,14 +82,14 @@ def main():
         print("6. Show by Category")
         print("7. Exit")
 
-        choice = input("Choose from action 1 - 6: ")
+        choice = input("Choose from action 1 - 7: ")
         try:
             choice = int(choice)
         except ValueError:
             print(f"Error, {choice} is not a number")
             continue
 
-        if not 0 < choice < 7:
+        if not 0 < choice <= 7:
             print(f"Error, invalid action {choice}")
             continue
 

@@ -30,7 +30,6 @@ class NewTransactionDialogView(QDialog):
         self.combo_box_type = QComboBox()
         self.combo_box_type.addItems(["Expense", "Income"])
         self.combo_box_category = QComboBox()
-        self.combo_box_category.addItems(["Need", "Want", "Saving", "Other"])
         self.line_edit_details = QLineEdit()
 
         self.button_ok = QPushButton("Ok")
