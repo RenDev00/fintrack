@@ -70,9 +70,11 @@ class FinanceTrackerView(QMainWindow):
         group_box_search = QGroupBox("Search")
         self.line_edit_search_term = QLineEdit(placeholderText="Enter a search term")
         self.combo_box_type = QComboBox()
-        self.combo_box_type.addItems(["All", "Expense", "Income"])
+        self.combo_box_type.addItems(["All Types", "Expense", "Income"])
         self.combo_box_category = QComboBox()
-        self.combo_box_category.addItems(["All", "Need", "Want", "Other"])
+        self.combo_box_category.addItems(["All Categories", "Need", "Want", "Other"])
+        self.combo_box_month = QComboBox()
+        self.combo_box_month.addItem("All Months")
 
         group_box_transactions = QGroupBox("Transactions")
         self.table_transactions = QTableWidget(0, 6)
@@ -85,6 +87,7 @@ class FinanceTrackerView(QMainWindow):
         self.table_transactions.setEditTriggers(
             QAbstractItemView.EditTrigger.NoEditTriggers
         )
+        self.table_transactions.setSortingEnabled(True)
 
         # Layout
         h_layout_control = QHBoxLayout()
@@ -97,6 +100,7 @@ class FinanceTrackerView(QMainWindow):
         h_layout_search.addWidget(self.line_edit_search_term)
         h_layout_search.addWidget(self.combo_box_type)
         h_layout_search.addWidget(self.combo_box_category)
+        h_layout_search.addWidget(self.combo_box_month)
         group_box_search.setLayout(h_layout_search)
 
         h_layout_control_search = QHBoxLayout()

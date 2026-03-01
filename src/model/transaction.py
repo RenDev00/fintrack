@@ -12,6 +12,9 @@ class TransactionCategory(StrEnum):
     NEED = "Need"
     WANT = "Want"
     SAVING = "Saving"
+    SALARY = "Salary"
+    SCHOLARSHIP = "Scholarship"
+    POCKET_MONEY = "Pocket Money"
     OTHER = "Other"
 
 
