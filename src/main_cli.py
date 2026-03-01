@@ -5,8 +5,6 @@ from model.transaction import TransactionCategory, TransactionType
 def add_transaction_cli(tracker: FinanceTracker):
     amount = input("Amount: ")
     transaction_type = input("Transaction type [expense / income]: ")
-    transaction_category = input("Transaction category [need / want / other]: ")
-    transaction_details = input("Transaction details: ")
 
     try:
         amount = float(amount)
@@ -20,8 +18,19 @@ def add_transaction_cli(tracker: FinanceTracker):
         print(f"Error, invalid transaction type {transaction_type}")
         return
 
+    if transaction_type == TransactionType.EXPENSE:
+        transaction_category = input("Transaction category [need / want / saving]: ")
+    else:
+        transaction_category = input(
+            "Transaction category [salary / scholarship / pocket money / other]: "
+        )
+
+    transaction_details = input("Transaction details: ")
+
     try:
-        transaction_category = TransactionCategory[transaction_category.upper()]
+        transaction_category = TransactionCategory[
+            transaction_category.upper().replace(" ", "_")
+        ]
     except KeyError:
         print(f"Error, invalid transaction category {transaction_category}")
         return
